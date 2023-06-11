@@ -1,9 +1,10 @@
 import { useState } from 'react'
 import { ThemeProvider } from 'styled-components'
 import { defaultTheme } from './styles/themes/default'
-import {GlobalStyle} from './styles/global'
+import { GlobalStyle } from './styles/global'
 import { Transactions } from './pages/Transactions'
 import { Summary } from './components/Summary'
+import { TransactionsProvider } from './contexts/TransactionsContext'
 
 export function App() {
   const [count, setCount] = useState(0)
@@ -11,7 +12,9 @@ export function App() {
   return (
     <ThemeProvider theme={defaultTheme}>
       <GlobalStyle />
+      <TransactionsProvider>
         <Transactions />
+      </TransactionsProvider>
     </ThemeProvider>
   )
 }
