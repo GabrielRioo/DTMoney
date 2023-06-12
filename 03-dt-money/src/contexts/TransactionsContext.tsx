@@ -1,44 +1,78 @@
-import { ReactNode, createContext, useEffect, useState } from "react";
+import { ReactNode, createContext, useEffect, useState } from 'react'
+import { api } from '../lib/axios'
 
 interface Transaction {
-    id: number;
-    description: string;
-    type: 'income' | 'outcome';
-    price: number;
-    category: string;
-    createdAt: string;
+  id: number
+  description: string
+  type: 'income' | 'outcome'
+  price: number
+  category: string
+  createdAt: string
+}
+
+interface CreateTransactionInput {
+  description: string
+  type: 'income' | 'outcome'
+  price: number
+  category: string
 }
 
 interface TransactionContextType {
-    transactions: Transaction[];
+  transactions: Transaction[]
+  fetchTransactions: (query?: string) => Promise<void>
+  createTransaction: (data: CreateTransactionInput) => Promise<void>
 }
 
 interface TransactionsProviderProps {
-    children: ReactNode;
+  children: ReactNode
 }
 
 export const TransactionsContext = createContext({} as TransactionContextType)
 
-export function TransactionsProvider( {children}: TransactionsProviderProps) {
-    const [transactions, setTransaction] = useState<Transaction[]>([])
+export function TransactionsProvider({ children }: TransactionsProviderProps) {
+  const [transactions, setTransaction] = useState<Transaction[]>([])
 
-    // Função assincrona para carregar as transações
-    async function loadTransactions() {
-        const response = await fetch('http://localhost:3000/transactions');
-        const data = await response.json();
+  // Função assincrona para carregar as transações
+  async function fetchTransactions(query?: string) {
+    const response = await api.get('/transactions', {
+      params: {
+        q: query,
+        _sort: 'createdAt',
+        _order: 'desc',
+      },
+    })
 
-        setTransaction(data)
-    }
+    setTransaction(response.data)
+  }
 
-    // Dentro do useEffect nao é possivel chamar funções asincronas
-    useEffect(() => {
-        loadTransactions()
-    }, [])
+  async function createTransaction(data: CreateTransactionInput) {
+    const { description, price, category, type } = data
 
+    const response = await api.post('transactions', {
+      description,
+      price,
+      category,
+      type,
+      createdAt: new Date(),
+    })
 
-    return (
-        <TransactionsContext.Provider value={{transactions}}>
-            {children}
-        </TransactionsContext.Provider>
-    )
+    setTransaction((state) => [response.data, ...state])
+  }
+
+  // Dentro do useEffect nao é possivel chamar funções asincronas
+  useEffect(() => {
+    fetchTransactions()
+  }, [])
+
+  return (
+    <TransactionsContext.Provider
+      value={{
+        transactions,
+        fetchTransactions,
+        createTransaction,
+      }}
+    >
+      {children}
+    </TransactionsContext.Provider>
+  )
 }
