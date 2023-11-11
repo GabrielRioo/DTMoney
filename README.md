@@ -1,4 +1,4 @@
-# Ignite_DTMoney
+# DTMoney
 
 ![image](https://github.com/GabrielRioo/Rocketseat_Ignite_DTMoney/assets/61875527/5134ba7f-24ef-4493-8de7-f022de069d05)
 
